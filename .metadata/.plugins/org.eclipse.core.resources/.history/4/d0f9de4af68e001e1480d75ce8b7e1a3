@@ -1,0 +1,42 @@
+#ifndef APP_HMI_H_
+#define APP_HMI_H_
+
+#include "../HAL/keypad.h"
+#include "../HAL/lcd.h"
+#include <util/delay.h> /* For the delay functions */
+
+uint8 pass[5];
+uint8 pass2[5];
+
+
+void EnterPass_Sequence(void);
+
+//saving the password in an array
+//displaying * as it is an pass
+//adjusting the enter value(=) & the numbers pressed in the keypad
+void Password_adjust(uint8 *pass_temp);
+
+//Function to increase the global seconds variable
+void CountSeconds(void);
+
+//function that counts the sec by :
+//causing an interrupt every second
+void DelaySeconds(uint8 sec);
+
+//Send pass to control_ecu through UART
+void SendPass(uint8 *pass);
+
+//Send pass2 to control_ecu through UART
+void SendPass2(uint8 *pass2);
+
+//Pass Entering
+//if the two passes are not the same -> then stay in the loop
+//until the user enters the same two passes
+void EnterPass(void);
+
+//Send the key entered by the user through UART
+void SendKey(void);
+
+void Door_Sequence(void);
+
+#endif /* APP_HMI_H_ */

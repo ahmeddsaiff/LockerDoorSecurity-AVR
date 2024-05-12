@@ -1,0 +1,132 @@
+#include "./HMI.h"
+
+extern uint8 key;
+extern uint8 PassChecking;
+
+//Function perform as the password is matched or not matched
+//function parameters -> another function
+//							as to :
+//								1)call the Door_Squence function
+//								2)call the EnterPass function
+void PassWrong_case(void(*func)(void)){
+	if (PassChecking == 2) {
+		Door_Sequence();
+	} else {
+		LCD_displayStringRowColumn(0, 0,"1 -> Wrong Pass");
+		LCD_displayStringRowColumn(1, 0, "pass: ");
+		LCD_moveCursor(1, 6); /* Move the cursor to the second row & column 6*/
+		Password_adjust(pass);
+		SendPass(pass);
+		PassChecking = UART_recieveByte();
+		LCD_clearScreen();
+		if (PassChecking == 2) {
+			Door_Sequence();
+		} else {
+			LCD_displayStringRowColumn(0, 0,"2 -> Wrong Pass");
+			LCD_displayStringRowColumn(1, 0, "pass: ");
+			LCD_moveCursor(1, 6); /* Move the cursor to the second row & column 6*/
+			Password_adjust(pass);
+			SendPass(pass);
+			PassChecking = UART_recieveByte();
+			LCD_clearScreen();
+			if (PassChecking == 2) {
+				Door_Sequence();
+			} else {
+				LCD_displayStringRowColumn(0, 0,"ERROR!!");
+				LCD_displayStringRowColumn(1, 0, "3 wrong passes");
+				Polling_one_minute();
+			}
+		}
+	}
+}
+
+
+int main(void) {
+
+	UART_Configurations();
+
+	LCD_init();
+
+	EnterPass();
+
+	while (1) {
+
+		LCD_clearScreen();
+		LCD_displayStringRowColumn(0, 0, "+ : Open Door");
+		LCD_displayStringRowColumn(1, 0, "- : Change Pass");
+		key = KEYPAD_getPressedKey();
+		LCD_clearScreen();
+		SendKey();
+		if (key == '+') {
+			LCD_displayStringRowColumn(0, 0, "pass to cont:");
+			LCD_moveCursor(1, 0);
+			Password_adjust(pass);
+			SendPass(pass);
+			PassChecking = UART_recieveByte();
+			LCD_clearScreen();
+//			if (PassChecking == 2) {
+//				Door_Sequence();
+//			} else {
+//				LCD_displayStringRowColumn(0, 0,"1 -> Wrong Pass");
+//				LCD_displayStringRowColumn(1, 0, "pass: ");
+//				LCD_moveCursor(1, 6); /* Move the cursor to the second row & column 6*/
+//				Password_adjust(pass);
+//				SendPass(pass);
+//				PassChecking = UART_recieveByte();
+//				LCD_clearScreen();
+//				if (PassChecking == 2) {
+//					Door_Sequence();
+//				} else {
+//					LCD_displayStringRowColumn(0, 0,"2 -> Wrong Pass");
+//					LCD_displayStringRowColumn(1, 0, "pass: ");
+//					LCD_moveCursor(1, 6); /* Move the cursor to the second row & column 6*/
+//					Password_adjust(pass);
+//					SendPass(pass);
+//					PassChecking = UART_recieveByte();
+//					LCD_clearScreen();
+//					if (PassChecking == 2) {
+//						Door_Sequence();
+//					} else {
+//						LCD_displayStringRowColumn(0, 0,"ERROR!!");
+//						LCD_displayStringRowColumn(1, 0, "3 wrong passes");
+//						Polling_one_minute();
+//					}
+//				}
+//			}
+		} else if (key == '-') {
+			LCD_displayStringRowColumn(0, 0, "pass to cont:");
+			LCD_moveCursor(1, 0);
+			Password_adjust(pass);
+			SendPass(pass);
+			PassChecking = UART_recieveByte();
+			LCD_clearScreen();
+			if (PassChecking == 2) {
+				EnterPass();
+			} else {
+				LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+				LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+				Password_adjust(pass);
+				SendPass(pass);
+				PassChecking = UART_recieveByte();
+				LCD_clearScreen();
+				if (PassChecking == 2) {
+					EnterPass();
+				} else {
+					LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+					LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+					Password_adjust(pass);
+					SendPass(pass);
+					PassChecking = UART_recieveByte();
+					LCD_clearScreen();
+					if (PassChecking == 2) {
+						EnterPass();
+					} else {
+						LCD_displayString("ERROR!!");
+						Polling_one_minute();
+					}
+				}
+			}
+		}
+	}
+}
+

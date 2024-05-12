@@ -1,0 +1,31 @@
+16:35:24 **** Incremental Build of configuration Debug for project DoorLockerSystem ****
+make all 
+Building file: ../CONTROL_ECU/MCAL/GPIO.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"CONTROL_ECU/MCAL/GPIO.d" -MT"CONTROL_ECU/MCAL/GPIO.o" -c -o "CONTROL_ECU/MCAL/GPIO.o" "../CONTROL_ECU/MCAL/GPIO.c"
+Finished building: ../CONTROL_ECU/MCAL/GPIO.c
+ 
+Building file: ../CONTROL_ECU/MCAL/PWM.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"CONTROL_ECU/MCAL/PWM.d" -MT"CONTROL_ECU/MCAL/PWM.o" -c -o "CONTROL_ECU/MCAL/PWM.o" "../CONTROL_ECU/MCAL/PWM.c"
+Finished building: ../CONTROL_ECU/MCAL/PWM.c
+ 
+Building file: ../CONTROL_ECU/HAL/DC_MOTOR.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"CONTROL_ECU/HAL/DC_MOTOR.d" -MT"CONTROL_ECU/HAL/DC_MOTOR.o" -c -o "CONTROL_ECU/HAL/DC_MOTOR.o" "../CONTROL_ECU/HAL/DC_MOTOR.c"
+Finished building: ../CONTROL_ECU/HAL/DC_MOTOR.c
+ 
+Building file: ../CONTROL_ECU/HAL/buzzer.c
+Invoking: AVR Compiler
+avr-gcc -Wall -g2 -gstabs -O0 -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -std=gnu99 -funsigned-char -funsigned-bitfields -mmcu=atmega32 -DF_CPU=8000000UL -MMD -MP -MF"CONTROL_ECU/HAL/buzzer.d" -MT"CONTROL_ECU/HAL/buzzer.o" -c -o "CONTROL_ECU/HAL/buzzer.o" "../CONTROL_ECU/HAL/buzzer.c"
+Finished building: ../CONTROL_ECU/HAL/buzzer.c
+ 
+Building target: DoorLockerSystem.elf
+Invoking: AVR C Linker
+avr-gcc -Wl,-Map,DoorLockerSystem.map -mmcu=atmega32 -o "DoorLockerSystem.elf"  ./CONTROL_ECU/MCAL/GPIO.o ./CONTROL_ECU/MCAL/PWM.o  ./CONTROL_ECU/HAL/DC_MOTOR.o ./CONTROL_ECU/HAL/buzzer.o   
+c:/users/ahmed/onedrive/desktop/m.t embedded diploma/interface/avr_setup/bin/../lib/gcc/avr/4.3.3/../../../../avr/lib/avr5/crtm32.o:(.init9+0x0): undefined reference to `main'
+make: *** [DoorLockerSystem.elf] Error 1
+"make all" terminated with exit code 2. Build might be incomplete.
+
+16:35:25 Build Failed. 2 errors, 0 warnings. (took 1s.7ms)
+

@@ -1,0 +1,129 @@
+#include "./HMI.h"
+#include "../CommonHeader-UsedFiles/std_types.h"
+#include "../MCAL/uart.h"
+#include "../HAL/keypad.h"
+#include "../MCAL/TIMER1.h"
+
+uint8 PassChecking = 1;
+uint8 key;
+
+void EnterPass(void) {
+	do {
+		LCD_clearScreen();
+		EnterPass_Sequence();
+		SendPass(pass);
+		SendPass2(pass2);
+		PassChecking = UART_recieveByte();
+	} while (PassChecking == 1);
+
+}
+
+void SendKey(void) {
+	UART_sendByte(key);
+}
+
+int main(void) {
+	uint8 EndPolling = 1;
+
+	UART_ConfigType ptr_uart_init = { Bits_Data_8, disabled, Bits_Stop_1,
+			RATE_9600 };
+	UART_init(&ptr_uart_init);
+
+	LCD_init();
+
+	EnterPass();
+
+	while (1) {
+
+		// PassChecking = 1;
+		LCD_clearScreen();
+		LCD_displayStringRowColumn(0, 0, "+ : Open Door");
+		LCD_displayStringRowColumn(1, 0, "- : Change Pass");
+		key = KEYPAD_getPressedKey();
+		LCD_clearScreen();
+		SendKey();
+		if (key == '+') {
+			LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+			LCD_moveCursor(1, 0);
+			Password_adjust(pass);
+			SendPass(pass);
+			PassChecking = UART_recieveByte();
+			if (PassChecking == 2) {
+				LCD_clearScreen();
+				LCD_displayString("DoorIsUnlocking");
+				_delay_ms(6000);
+				_delay_ms(6000);
+				_delay_ms(2000);
+				LCD_clearScreen();
+				LCD_displayString("Stop motor");
+				_delay_ms(3000);
+				LCD_clearScreen();
+				LCD_displayString("Door is locking");
+				_delay_ms(6000);
+				_delay_ms(6000);
+				_delay_ms(3000);
+			} else {
+				LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+				LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+				Password_adjust(pass);
+				SendPass(pass);
+				PassChecking = UART_recieveByte();
+				LCD_clearScreen();
+				if (PassChecking == 2) {
+					EnterPass();
+				} else {
+					LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+					LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+					Password_adjust(pass);
+					SendPass(pass);
+					PassChecking = UART_recieveByte();
+					LCD_clearScreen();
+					if (PassChecking == 2) {
+						EnterPass();
+					} else {
+						LCD_displayString("ERROR!!");
+						for (uint8 i = 0; i < 10; i++) {
+							_delay_ms(6000);
+						}
+					}
+				}
+			}
+		} else if (key == '-') {
+			LCD_displayStringRowColumn(0, 0, "pass to cont:");
+			LCD_moveCursor(1, 0);
+			Password_adjust(pass);
+			SendPass(pass);
+			PassChecking = UART_recieveByte();
+			LCD_clearScreen();
+			if (PassChecking == 2) {
+				EnterPass();
+			} else {
+				LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+				LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+				Password_adjust(pass);
+				SendPass(pass);
+				PassChecking = UART_recieveByte();
+				LCD_clearScreen();
+				if (PassChecking == 2) {
+					EnterPass();
+				} else {
+					LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+					LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+					Password_adjust(pass);
+					SendPass(pass);
+					PassChecking = UART_recieveByte();
+					LCD_clearScreen();
+					if (PassChecking == 2) {
+						EnterPass();
+					} else {
+						LCD_displayString("ERROR!!");
+						for (uint8 i = 0; i < 10; i++) {
+							_delay_ms(6000);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+

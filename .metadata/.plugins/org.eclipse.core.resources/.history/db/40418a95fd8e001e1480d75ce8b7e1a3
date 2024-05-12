@@ -1,0 +1,20 @@
+/*
+ * Control.h
+ *
+ *  Created on: Nov 29, 2023
+ *      Author: ahmed
+ */
+
+#ifndef APP_CONTROL_H_
+#define APP_CONTROL_H_
+
+//Function to increase the global seconds variable
+void CountSeconds(void);
+
+//function that counts the sec by :
+//causing an interrupt every second
+void DelaySeconds(uint8 sec);
+
+
+
+#endif /* APP_CONTROL_H_ */

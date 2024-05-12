@@ -1,0 +1,68 @@
+/*
+ * Control.h
+ *
+ *  Created on: Nov 29, 2023
+ *      Author: ahmed
+ */
+
+#ifndef APP_CONTROL_H_
+#define APP_CONTROL_H_
+
+#include "../HAL/DC_MOTOR.h"
+#include "../HAL/buzzer.h"
+#include "../HAL/external_eeprom.h"
+#include "../MCAL/PWM.h"
+#include "../MCAL/uart.h"
+#include "util/delay.h"
+#include "../MCAL/twi.h"
+#include "../MCAL/TIMER1.h"
+#include "avr/io.h"
+
+uint8 Pass1[5], RePass2[5];
+uint8 Pass_saved[5];
+uint8 key_received;
+
+#define SUCCESS 2
+#define FALIED 1
+
+//Function to increase the global seconds variable
+void CountSeconds(void);
+
+//function that counts the sec by :
+//causing an interrupt every second
+void DelaySeconds(uint8 sec);
+
+
+//Checking if the two passwords are the same and return TRUE | FALSE
+uint8 CheckMatchingPass(uint8 *EnteredPass1, uint8 *RenteredPass2);
+
+void RecievePass(void);
+
+void RecievePass2(void);
+
+void savePass(uint8 *pass);
+
+void readPass(void);
+
+
+// Pass receiving , checking & Saving
+//Note: msh hano5rog mn al function 8er lama al etnen passwords yeb2o nafs al haga
+void EnterPass(void);
+
+
+// Apply the logic of the motor
+//		• rotates motor for 15-seconds CW and display a message on the screen “Door is Unlocking”
+//		• hold the motor for 3-seconds.
+//		• rotates motor for 15-seconds A-CW and display a message on the screen “Door is Locking”
+void Door_Sequence(void);
+
+
+//Function perform as the password is matched or not matched
+//function parameters -> another function
+//							as to :
+//								1)call the Door_Squence function
+//								2)call the EnterPass function
+void PassWrong_case(void(*func)(void));
+
+
+#endif /* APP_CONTROL_H_ */

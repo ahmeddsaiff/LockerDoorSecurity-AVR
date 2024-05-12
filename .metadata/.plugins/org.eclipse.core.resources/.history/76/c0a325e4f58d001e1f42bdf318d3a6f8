@@ -1,0 +1,107 @@
+#include "./HMI.h"
+#include "../MCAL/TIMER1.h"
+
+//key pressed
+uint8 key;
+
+
+boolean checkPassValue;
+uint8 numCheckpass = 1;
+
+uint8 g_sec = 0;
+
+//saving the password in an array
+//displaying * as it is an pass
+//adjusting the enter value(=) & the numbers pressed in the keypad
+void Password_adjust(char *pass_temp) {
+	uint8 key_num = 0;
+	while (1) {
+		/* Get the pressed key number, if any switch pressed for more than 500 ms it will considered more than one press */
+		key = KEYPAD_getPressedKey();
+		if (key_num < 5) {
+			if ((key <= 9) && (key >= 0)) {
+				LCD_intgerToString(key); /* display the pressed keypad switch */
+				//store the password in an array
+				pass_temp[key_num] = key;
+				key_num++;
+			}
+			_delay_ms(500); /* Press time */
+		}
+		//after entering the pass of 5 numbers
+		//wait for pressing "=" as enter to continue execution
+		if (key == '=') {
+			break;
+		}
+	}
+
+}
+
+void EnterPass_Sequence(void) {
+	LCD_clearScreen();
+	LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+	LCD_moveCursor(1, 0); /* Move the cursor to the second row */
+	Password_adjust(pass);
+	LCD_displayStringRowColumn(0, 0, "PLZ re-enter the");
+	LCD_displayStringRowColumn(1, 0, "same pass:");
+	LCD_moveCursor(1, 11);
+	Password_adjust(pass2);
+}
+
+void SendPass(char *pass){
+	for(uint8 i = 0 ; i<5 ; i++){
+		UART_sendByte(pass[i]);
+	}
+}
+
+void SendPass2( char *pass2){
+	for(uint8 i = 0 ; i<5 ; i++){
+		UART_sendByte(pass2[i]);
+	}
+
+
+//the main options that are always displayed
+void LCD_Main_Options(void) {
+	LCD_displayStringRowColumn(0, 0, "+ : Open Door");
+	LCD_displayStringRowColumn(1, 0, "- : Change Pass");
+	key = KEYPAD_getPressedKey();
+	LCD_clearScreen();
+	if (key == '+') {
+		LCD_displayStringRowColumn(0, 0, "PLZ enter pass:");
+		LCD_moveCursor(1, 0);
+		Password_adjust(pass);
+
+	} else if (key == '-') {
+		LCD_displayStringRowColumn(0, 0, "pass to cont:");
+		LCD_moveCursor(1, 0);
+		Password_adjust(pass);
+
+		}
+	}
+
+
+
+//Function to increase the global seconds variable
+void CountSeconds(void) {
+	g_sec++;
+}
+
+//function that counts the sec by :
+//causing an interrupt every second
+void DelaySeconds(uint8 sec) {
+
+	/* setting the callBack function to count seconds */
+	Timer1_setCallBack(CountSeconds);
+
+	/* timer1 configurations -> count 1 second per interrupt */
+	Timer1_ConfigType timer1Config = { 0, 31250, F_CPU_256, CompareMode };
+
+	TIMER1_Init(&timer1Config);
+
+	//stay in the loop until finishing count of seconds
+	while (g_sec < sec);
+
+	//safarna al global variable 3lshan al mara aly gya
+	g_sec = 0;
+
+	Timer1_deInit();
+}

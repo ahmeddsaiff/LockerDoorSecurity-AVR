@@ -1,0 +1,133 @@
+#include "../HAL/DC_MOTOR.h"
+#include "../HAL/buzzer.h"
+#include "../HAL/external_eeprom.h"
+#include "../MCAL/PWM.h"
+#include "../MCAL/uart.h"
+#include "util/delay.h"
+#include "../MCAL/twi.h"
+#include "../MCAL/TIMER1.h"
+#include "avr/io.h"
+
+uint8 Pass1[5], RePass2[5];
+uint8 Pass_saved[5];
+uint8 key_received;
+
+//global variable to store the confirmation of received passwords
+uint8 match_NotMatch = 1;
+
+uint8 g_sec = 0;
+
+//Function to increase the global seconds variable
+void CountSeconds(void) {
+	g_sec++;
+}
+
+//function that counts the sec by :
+//causing an interrupt every second
+void DelaySeconds(uint8 sec) {
+
+	/* setting the callBack function to count seconds */
+	Timer1_setCallBack(CountSeconds);
+
+	/* timer1 configurations -> count 1 second per interrupt */
+	Timer1_ConfigType timer1Config = { 0, 31250, F_CPU_256, CompareMode };
+
+	TIMER1_Init(&timer1Config);
+
+	//stay in the loop until finishing count of seconds
+	while (g_sec < sec)
+		;
+
+	//safarna al global variable 3lshan al mara aly gya
+	g_sec = 0;
+
+	Timer1_deInit();
+}
+
+uint8 CheckMatchingPass(uint8 *EnteredPass1, uint8 *RenteredPass2) {
+	for (uint8 i = 0; i < 5; i++) {
+		if (EnteredPass1[i] != RenteredPass2[i])
+			return 1;
+	}
+	return 2;
+}
+
+void RecievePass(void) {
+	for (uint8 i = 0; i < 5; i++) {
+		Pass1[i] = UART_recieveByte();
+	}
+}
+
+void RecievePass2(void) {
+	for (uint8 i = 0; i < 5; i++) {
+		RePass2[i] = UART_recieveByte();
+	}
+}
+
+void savePass(uint8 *pass) {
+	for (uint8 i = 0; i < 5; i++) {
+		EEPROM_writeByte((0x0311 + i), pass[i]);
+		_delay_ms(10);
+	}
+}
+
+void readPass(void) {
+	for (uint8 i = 0; i < 5; i++) {
+		EEPROM_readByte((0x0311 + i), Pass_saved + i);
+		_delay_ms(10);
+	}
+}
+
+int main(void) {
+
+	UART_ConfigType ptr_uart_init = { Bits_Data_8, disabled, Bits_Stop_1,
+			RATE_9600 };
+	UART_init(&ptr_uart_init);
+
+	DcMotor_init();
+	SREG |= (1 << 7);
+
+	TWI_ConfigType *ptr_twi_init;
+	ptr_twi_init->address = 0x01;
+	ptr_twi_init->bit_rate = 2;
+	TWI_init(&ptr_twi_init);
+
+	while (match_NotMatch == 1) {
+		RecievePass();
+		RecievePass2();
+		match_NotMatch = CheckMatchingPass(Pass1, RePass2);
+		UART_sendByte(match_NotMatch);
+	}
+	savePass(Pass1);
+
+	key_received = UART_recieveByte();
+
+	if (key_received == '+') {
+		RecievePass();
+		readPass();
+
+		match_NotMatch = CheckMatchingPass(Pass1, Pass_saved);
+		UART_sendByte(match_NotMatch);
+
+		if (match_NotMatch == 2) {
+			DcMotor_Rotate(CW, 100);
+			DelaySeconds(15);
+			DcMotor_Rotate(STOP, 0);
+			DelaySeconds(3);
+			DcMotor_Rotate(A_CW, 100);
+			DelaySeconds(15);
+			DcMotor_Rotate(STOP, 0);
+		}
+	}
+	else if(key_received == '-'){
+
+	}
+
+	RecievePass();
+	readPass();
+
+	match_NotMatch = CheckMatchingPass(Pass1, Pass_saved);
+	UART_sendByte(match_NotMatch);
+
+}
+
